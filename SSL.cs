@@ -63,9 +63,8 @@ namespace pipWebCenter.Handler
                     }
                     else
                     {
-                        //_dbContext.Entry(ori).CurrentValues.SetValues(ori.Available = 0);
                         s.Available = 0;
-                        context.Ori.Update(s);
+                        context.Some.Update(s);
                         context.SaveChanges();
                         _logger.LogInformation($"Список вернувшихся сервисов пуст, проверьте доступность ОРИ:{s.OriId}");
                     }
@@ -119,11 +118,11 @@ namespace pipWebCenter.Handler
         /// Получение сертификатов из БД
         /// </summary>
         /// <param name="req"></param>
-        /// <param name="ori"></param>
+        /// <param name="s"></param>
         /// <returns></returns>
         X509Certificate2 GetClientCertificate(HttpWebRequest req, Some s)
         {
-            var certs = context.OriCerts.Find(ori.OriId);
+            var certs = context.OriCerts.Find(s.OriId);
             if (certs != null)
             {
                 X509Certificate2 caCert = new X509Certificate2(Encoding.ASCII.GetBytes(certs.CaCert));
@@ -133,13 +132,13 @@ namespace pipWebCenter.Handler
             }
             else
             {
-                Console.WriteLine($"Сертификат не найден для {ori.OriId}");
+                Console.WriteLine($"Сертификат не найден для {s.OriId}");
                 return null;
             }
         }
 
         /// <summary>
-        /// Получаем список сервисов для виртуального ori
+        /// Получаем список сервисов для виртуального s
         /// </summary>
         /// <param name="s"></param>
         /// <param name="connect"></param>
@@ -159,7 +158,7 @@ namespace pipWebCenter.Handler
                         {
                             if (s.Uri.Contains("http://"))
                             {
-                                response = await newclient.GetAsync(oriUri);
+                                response = await newclient.GetAsync(uri);
                                 strservices = await response.Content.ReadAsAsync<string>();
                             }
                             if (s.Uri.Contains("https://"))
@@ -218,7 +217,7 @@ namespace pipWebCenter.Handler
             try
             {
                 s.Available = 1;
-                context.Ori.Update(s);
+                context.Some.Update(s);
                 for (int i = 0; i < servicesvo.elements.Count; i++)
                 {
                     if (string.IsNullOrEmpty(servicesvo.elements[i].sni))
